@@ -11,7 +11,9 @@ import java.util.Observer;
 public class Interfaz implements Observer {
 
     String username;
-    int destinatario; //cambiar a int
+    int destinatario;
+    int puerto;
+    Servidor servidor;
     JFrame ventana;
     JButton btn_enviar;
     JTextField txt_mensaje;
@@ -28,8 +30,16 @@ public class Interfaz implements Observer {
         username = JOptionPane.showInputDialog("Digite su nombre de usuario: ");
         IniciarServidor();
         crearInterfaz();
-        //destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
-        //System.out.println(destinatario);
+        destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
+        System.out.println(destinatario);
+
+    }
+
+    public void IniciarServidor(){
+        servidor = new Servidor();
+        servidor.addObserver(this);
+        Thread hilo_servidor = new Thread(servidor);
+        hilo_servidor.start();
 
     }
 
@@ -56,6 +66,9 @@ public class Interfaz implements Observer {
         ventana.setResizable(false);
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        puerto = servidor.getPuerto();
+        vista_chat.append("Mi puerto: " + String.valueOf (puerto) + "\n" + "\n");
+
         btn_enviar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enviar_msg();
@@ -67,17 +80,12 @@ public class Interfaz implements Observer {
 
         vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
 
-        Cliente envia_mensaje = new Cliente(6000, username + ":  " + this.txt_mensaje.getText() + "\n");
+        Cliente envia_mensaje = new Cliente(destinatario, username + ":  " + this.txt_mensaje.getText() + "\n");
         Thread hilo_cliente = new Thread(envia_mensaje);
         hilo_cliente.start();
     }
 
-    public void IniciarServidor(){
-        Servidor servidor = new Servidor(5000);
-        servidor.addObserver(this);
-        Thread hilo_servidor = new Thread(servidor);
-        hilo_servidor.start();
-    }
+
 
     @Override
     public void update(Observable o, Object arg) {

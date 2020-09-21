@@ -8,10 +8,11 @@ import java.util.Observable;
 
 public class Servidor extends Observable implements Runnable {
 
+
     private int puerto;
 
-    public Servidor(int puerto) {
-        this.puerto = puerto;
+    public Servidor() {
+        puerto = 5000;
         System.out.println("crea instance");
     }
 
@@ -21,6 +22,9 @@ public class Servidor extends Observable implements Runnable {
         ServerSocket servidor = null;
         Socket sc = null;
         DataInputStream in;
+
+
+        while (puerto < 10000){
 
         try {
             //Creamos el socket del servidor
@@ -50,11 +54,15 @@ public class Servidor extends Observable implements Runnable {
                 System.out.println("Cliente desconectado");
 
             }
-
         } catch (IOException ex) {
-            System.out.println("error");;
+            System.out.println("error");
+            puerto++;
+        }
         }
 
+    }
+    public int getPuerto() {
+        return puerto;
     }
 
 }
