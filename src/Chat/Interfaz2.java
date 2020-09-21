@@ -1,17 +1,14 @@
 package Chat;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-
-public class Interfaz implements Observer {
+public class Interfaz2 implements Observer {
 
     String username;
-    int destinatario; //cambiar a int
+    String destinatario; //cambiar a int
     JFrame ventana;
     JButton btn_enviar;
     JTextField txt_mensaje;
@@ -21,15 +18,14 @@ public class Interfaz implements Observer {
     JScrollPane scroll;
 
     public static void main(String[] args) {
-        new Interfaz();
+        new Interfaz2();
     }
 
-    public Interfaz(){
+    public Interfaz2(){
         username = JOptionPane.showInputDialog("Digite su nombre de usuario: ");
-        IniciarServidor();
+        destinatario = JOptionPane.showInputDialog("Digite el puerto de su destinatario: ");
         crearInterfaz();
-        //destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
-        //System.out.println(destinatario);
+        IniciarServidor();
 
     }
 
@@ -67,13 +63,13 @@ public class Interfaz implements Observer {
 
         vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
 
-        Cliente envia_mensaje = new Cliente(6000, username + ":  " + this.txt_mensaje.getText() + "\n");
+        Cliente envia_mensaje = new Cliente(5000, username + "  " + this.txt_mensaje.getText() + "\n");
         Thread hilo_cliente = new Thread(envia_mensaje);
         hilo_cliente.start();
     }
 
     public void IniciarServidor(){
-        Servidor servidor = new Servidor(5000);
+        Servidor servidor = new Servidor(6000);
         servidor.addObserver(this);
         Thread hilo_servidor = new Thread(servidor);
         hilo_servidor.start();
