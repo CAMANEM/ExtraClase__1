@@ -6,21 +6,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.zip.ZipEntry;
 
 
 public class Interfaz implements Observer {
 
     String username;
-    int destinatario;
-    int puerto;
+    int destinatario = 0;
+    JList chats;
     Servidor servidor;
     JFrame ventana;
-    JButton btn_enviar;
     JTextField txt_mensaje;
     JTextArea vista_chat;
-    JPanel contenedor_vista_chat;
-    JPanel contenedor_btntxt;
-    JScrollPane scroll;
 
 
     /**
@@ -38,10 +35,7 @@ public class Interfaz implements Observer {
     public Interfaz(){
         username = JOptionPane.showInputDialog("Digite su nombre de usuario: ");
         IniciarServidor();
-        crearInterfaz();
-        destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
-        System.out.println(destinatario);
-
+        crearInterfazGrafica();
     }
 
     /**
@@ -58,31 +52,58 @@ public class Interfaz implements Observer {
     /**
      * Se crea todo lo referente a la interfaz gráfica.
      */
-    public void crearInterfaz() {
-        ventana = new JFrame("Chat");
-        btn_enviar = new JButton("Enviar");
-        txt_mensaje = new JTextField(4);
-        vista_chat = new JTextArea(27, 3);
+    public void crearInterfazGrafica() {
+
+        //BorderLayout North
+        JPanel zona_superior = new JPanel();
+        zona_superior.setLayout(new BorderLayout());
+        JButton btn_destinatario = new JButton("Agregar Destinatario");
+        btn_destinatario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                agregarDestinatario();
+            }
+        });
+        zona_superior.add(btn_destinatario, BorderLayout.NORTH);//agregar aqui el comando para cambiar puerto
+
+        //BorderLayout West
+        JPanel zona_izquierda = new JPanel();
+        zona_izquierda.setLayout(new BorderLayout());
+        chats = new JList();
+        chats.setFont(new Font("Arial", Font.ITALIC,20));
+        String[] data = {"Hernan(5000)","Julio(6000)"};
+        chats.setListData(data);
+        JScrollPane scroll_chats = new JScrollPane(chats);
+        zona_izquierda.add(scroll_chats);
+
+        //BorderLayout Center
+        JPanel zona_Central = new JPanel();
+        zona_Central.setLayout(new BorderLayout());
+        vista_chat = new JTextArea(10, 1);
         vista_chat.setEditable(false);
-        scroll = new JScrollPane(vista_chat);
-        contenedor_vista_chat = new JPanel();
-        contenedor_vista_chat.setLayout(new GridLayout(1, 1));
-        contenedor_vista_chat.add(scroll);
-        contenedor_btntxt = new JPanel();
-        contenedor_btntxt.setLayout(new GridLayout(1, 2));
-        contenedor_btntxt.add(txt_mensaje);
-        contenedor_btntxt.add(btn_enviar);
+        JScrollPane scroll = new JScrollPane(vista_chat); //quitar de argumentos
+        zona_Central.add(scroll);
+
+        //BorderLayout South
+        JPanel zona_inferior = new JPanel();
+        zona_inferior.setLayout(new GridLayout());
+        txt_mensaje = new JTextField(1);
+        JButton btn_enviar = new JButton("Enviar");
+        zona_inferior.add(txt_mensaje);
+        zona_inferior.add(btn_enviar);
+
+        ventana = new JFrame("Chat");
         ventana.setLayout(new BorderLayout());
-        ventana.add(contenedor_vista_chat, BorderLayout.NORTH);
-        ventana.add(contenedor_btntxt, BorderLayout.SOUTH);
+        ventana.add(zona_superior, BorderLayout.NORTH);
+        ventana.add(zona_izquierda, BorderLayout.WEST);
+        ventana.add(zona_Central, BorderLayout.CENTER);
+        ventana.add(zona_inferior, BorderLayout.SOUTH);
         ventana.setSize(500, 500);
         ventana.setLocationRelativeTo(null);
         ventana.setVisible(true);
         ventana.setResizable(false);
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        puerto = servidor.getPuerto();
-        vista_chat.append("Mi puerto: " + String.valueOf (puerto) + "\n" + "\n");
+        vista_chat.append("Mi puerto: " + servidor.getPuerto() + "\n" + "\n");
 
         btn_enviar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -92,15 +113,25 @@ public class Interfaz implements Observer {
     }
 
     /**
+     * Agrega un nuevo puerto para enviar mensajes
+     */
+    public void agregarDestinatario(){
+        destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
+    }
+
+    /**
      * Crea ina instancia de la clase Cliente para enviar un mensaje al presionar el botón de enviar mensaje
      */
     private void enviar_msg(){
 
-        vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
+        if (destinatario != 0) {
 
-        Cliente envia_mensaje = new Cliente(destinatario, username + ":  " + this.txt_mensaje.getText() + "\n");
-        Thread hilo_cliente = new Thread(envia_mensaje);
-        hilo_cliente.start();
+            vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
+
+            Cliente envia_mensaje = new Cliente(destinatario, username + ":  " + this.txt_mensaje.getText() + "\n");
+            Thread hilo_cliente = new Thread(envia_mensaje);
+            hilo_cliente.start();
+        }
     }
 
 
