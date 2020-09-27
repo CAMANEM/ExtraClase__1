@@ -6,16 +6,27 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Esta clase se encarga de realizar el envío del mensaje
+ */
 public class Cliente implements Runnable {
 
     private int puerto;
     private String mensaje;
 
+    /**
+     * Constructor de la clase
+     * @param puerto
+     * @param mensaje
+     */
     public Cliente(int puerto, String mensaje) {
         this.puerto = puerto;
         this.mensaje = mensaje;
     }
 
+    /**
+     * Hilo con el que se envía el mensaje
+     */
     @Override
     public void run() {
         //Host del servidor
@@ -25,14 +36,14 @@ public class Cliente implements Runnable {
 
         try {
             //Creo el socket para conectarme con el cliente
-            Socket sc = new Socket(HOST, puerto);
+            Socket socket = new Socket(HOST, puerto);
 
-            out = new DataOutputStream(sc.getOutputStream());
+            out = new DataOutputStream(socket.getOutputStream());
 
             //Envio un mensaje al cliente
             out.writeUTF(mensaje);
 
-            sc.close();
+            socket.close();
 
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);

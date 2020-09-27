@@ -22,10 +22,19 @@ public class Interfaz implements Observer {
     JPanel contenedor_btntxt;
     JScrollPane scroll;
 
+
+    /**
+     * Main en el que se inicializa el programa, llama al constructor de la interfaz.
+     * @param args
+     */
     public static void main(String[] args) {
+
         new Interfaz();
     }
 
+    /**
+     * Constructor en el que se inicia el servidor, se crea la interfaz y se define el nombre del usuario.
+     */
     public Interfaz(){
         username = JOptionPane.showInputDialog("Digite su nombre de usuario: ");
         IniciarServidor();
@@ -35,6 +44,9 @@ public class Interfaz implements Observer {
 
     }
 
+    /**
+     * Crea el servidor y lo mantiene siempre a la espera de mensajes mediante un hilo.
+     */
     public void IniciarServidor(){
         servidor = new Servidor();
         servidor.addObserver(this);
@@ -43,6 +55,9 @@ public class Interfaz implements Observer {
 
     }
 
+    /**
+     * Se crea todo lo referente a la interfaz gráfica.
+     */
     public void crearInterfaz() {
         ventana = new JFrame("Chat");
         btn_enviar = new JButton("Enviar");
@@ -76,6 +91,9 @@ public class Interfaz implements Observer {
         });
     }
 
+    /**
+     * Crea ina instancia de la clase Cliente para enviar un mensaje al presionar el botón de enviar mensaje
+     */
     private void enviar_msg(){
 
         vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
@@ -86,7 +104,12 @@ public class Interfaz implements Observer {
     }
 
 
-
+    /**
+     * Observer que se activa cuando el servidor recibe un mensaje.
+     * Este método muestra el mensaje recibido en la ventana de chat
+     * @param o
+     * @param arg
+     */
     @Override
     public void update(Observable o, Object arg) {
         this.vista_chat.append((String) arg);
