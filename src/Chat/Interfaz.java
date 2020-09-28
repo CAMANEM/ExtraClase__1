@@ -1,24 +1,30 @@
 package Chat;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Observable;
-import java.util.Observer;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
 import java.util.zip.ZipEntry;
 
 
 public class Interfaz implements Observer {
 
     String username;
+    int mi_puerto;
     int destinatario = 0;
-    JList chats;
+    JList chats; //contiene los puertos en Jlist
+    ArrayList contactos = new ArrayList(); //Arreglo que permite modificar la Jlist
     Servidor servidor;
     JFrame ventana;
     JTextField txt_mensaje;
     JTextArea vista_chat;
-
+    Map<String, String> conversaciones = new HashMap<>();
+    java.lang.String destinatario_comparador;
 
     /**
      * Main en el que se inicializa el programa, llama al constructor de la interfaz.
@@ -46,6 +52,7 @@ public class Interfaz implements Observer {
         servidor.addObserver(this);
         Thread hilo_servidor = new Thread(servidor);
         hilo_servidor.start();
+        mi_puerto = servidor.getPuerto();
 
     }
 
@@ -63,17 +70,7 @@ public class Interfaz implements Observer {
                 agregarDestinatario();
             }
         });
-        zona_superior.add(btn_destinatario, BorderLayout.NORTH);//agregar aqui el comando para cambiar puerto
-
-        //BorderLayout West
-        JPanel zona_izquierda = new JPanel();
-        zona_izquierda.setLayout(new BorderLayout());
-        chats = new JList();
-        chats.setFont(new Font("Arial", Font.ITALIC,20));
-        String[] data = {"Hernan(5000)","Julio(6000)"};
-        chats.setListData(data);
-        JScrollPane scroll_chats = new JScrollPane(chats);
-        zona_izquierda.add(scroll_chats);
+        zona_superior.add(btn_destinatario, BorderLayout.NORTH);
 
         //BorderLayout Center
         JPanel zona_Central = new JPanel();
@@ -82,6 +79,29 @@ public class Interfaz implements Observer {
         vista_chat.setEditable(false);
         JScrollPane scroll = new JScrollPane(vista_chat); //quitar de argumentos
         zona_Central.add(scroll);
+
+
+        //BorderLayout West
+        JPanel zona_izquierda = new JPanel();
+        zona_izquierda.setLayout(new BorderLayout());
+        chats = new JList();
+        chats.setFont(new Font("Arial", Font.ITALIC,20));
+        contactos.add(servidor.getPuerto());
+        chats.setListData(contactos.toArray());
+        JScrollPane scroll_chats = new JScrollPane(chats);
+        zona_izquierda.add(scroll_chats);
+        chats.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        chats.addListSelectionListener(e -> {
+            destinatario = (int) chats.getSelectedValue();
+            if (conversaciones.get(Integer.toString(destinatario)) == null){
+                vista_chat.setText("Mi puerto: " + servidor.getPuerto() + "\n" + "\n");
+            }
+            else {
+                vista_chat.setText(conversaciones.get(Integer.toString(destinatario)));
+            }
+
+        });
+
 
         //BorderLayout South
         JPanel zona_inferior = new JPanel();
@@ -113,10 +133,14 @@ public class Interfaz implements Observer {
     }
 
     /**
-     * Agrega un nuevo puerto para enviar mensajes
+     * Agrega un nuevo puerto para enviar mensajes, se activa con el botón de agregar destinatario
      */
     public void agregarDestinatario(){
-        destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
+        int nuevo_destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
+        if (contactos.contains(nuevo_destinatario) == false) {
+            contactos.add(nuevo_destinatario);
+            chats.setListData(contactos.toArray());
+        }
     }
 
     /**
@@ -128,9 +152,15 @@ public class Interfaz implements Observer {
 
             vista_chat.append("Tú: " + this.txt_mensaje.getText() + "\n");
 
-            Cliente envia_mensaje = new Cliente(destinatario, username + ":  " + this.txt_mensaje.getText() + "\n");
+            Cliente envia_mensaje = new Cliente(destinatario,  servidor.getPuerto() + ":" +"(" +username + ")" + ":  " + this.txt_mensaje.getText() + "\n ");
             Thread hilo_cliente = new Thread(envia_mensaje);
             hilo_cliente.start();
+            if (conversaciones.get(Integer.toString(destinatario)) == null){
+                conversaciones.put(Integer.toString(destinatario), "Tú: " + this.txt_mensaje.getText() + "\n");
+            }
+            else {
+                conversaciones.put(Integer.toString(destinatario), conversaciones.get(Integer.toString(destinatario)) + "Tú: " + this.txt_mensaje.getText() + "\n");
+            }
         }
     }
 
@@ -143,6 +173,24 @@ public class Interfaz implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        this.vista_chat.append((String) arg);
-    }
+
+        String[] mensaje_dividido = ((String) arg).split(":");
+        if (Integer.toString(destinatario).equals(mensaje_dividido[0])) {
+            this.vista_chat.append((String) arg);
+        }
+
+        if (conversaciones.get(mensaje_dividido[0]) == null){
+            conversaciones.put(mensaje_dividido[0], (String) arg);
+            if (contactos.contains(Integer.parseInt(mensaje_dividido[0])) == false) {
+                contactos.add(Integer.parseInt(mensaje_dividido[0]));
+                chats.setListData(contactos.toArray());
+            }
+        }
+        else {
+            conversaciones.put(mensaje_dividido[0], conversaciones.get(mensaje_dividido[0]) + (String) arg);
+            System.out.println(conversaciones.get(mensaje_dividido[0]));
+        }
+
+        }
+
 }

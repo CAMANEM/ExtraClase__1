@@ -45,12 +45,12 @@ public class Servidor extends Observable implements Runnable {
                 socket = servidor.accept();
 
                 System.out.println("Cliente conectado");
+
                 in = new DataInputStream(socket.getInputStream());
 
                 //Leo el mensaje que me envia
                 String mensaje = in.readUTF();
 
-                System.out.println(mensaje);
 
                 this.setChanged();
                 this.notifyObservers(mensaje);
