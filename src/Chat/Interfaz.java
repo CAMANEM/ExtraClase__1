@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
-//Este comentario es un cambio de prueba//
 
 public class Interfaz implements Observer {
 
