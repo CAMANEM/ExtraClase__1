@@ -10,9 +10,14 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.logging.*;
+
 
 
 public class Interfaz implements Observer {
+
+    private final static Logger logger = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME );
+
 
     String username;
     int mi_puerto;
@@ -39,9 +44,32 @@ public class Interfaz implements Observer {
      * Constructor en el que se inicia el servidor, se crea la interfaz y se define el nombre del usuario.
      */
     public Interfaz(){
+
+        configurarLogger();
         username = JOptionPane.showInputDialog("Digite su nombre de usuario: ");
         IniciarServidor();
         crearInterfazGrafica();
+    }
+
+    public void configurarLogger(){
+
+        LogManager.getLogManager().reset();
+        logger.setLevel(Level.ALL);
+
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.ALL);
+        logger.addHandler(consoleHandler);
+
+        try {
+            FileHandler fileHandler = new FileHandler("Logging_File.log", false);
+            //fileHandler.setFormatter(new SimpleFormatter()); // simplifica los logs
+            fileHandler.setLevel(Level.ALL);
+            logger.addHandler(fileHandler);
+        }
+        catch (IOException e){
+
+            logger.log(Level.SEVERE, "Error al generar fileHandler y Logging_File.log", e);
+        }
     }
 
     /**
@@ -49,6 +77,7 @@ public class Interfaz implements Observer {
      */
     public void IniciarServidor(){
         servidor = new Servidor();
+        logger.info("se creo el servidor sin error?");
         servidor.addObserver(this);
         Thread hilo_servidor = new Thread(servidor);
         hilo_servidor.start();
@@ -136,10 +165,15 @@ public class Interfaz implements Observer {
      * Agrega un nuevo puerto para enviar mensajes, se activa con el botón de agregar destinatario
      */
     public void agregarDestinatario(){
-        int nuevo_destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
-        if (contactos.contains(nuevo_destinatario) == false) {
-            contactos.add(nuevo_destinatario);
-            chats.setListData(contactos.toArray());
+        try {
+            int nuevo_destinatario = Integer.parseInt(JOptionPane.showInputDialog("Digite el puerto de su destinatario: "));
+            if (contactos.contains(nuevo_destinatario) == false) {
+                contactos.add(nuevo_destinatario);
+                chats.setListData(contactos.toArray());
+            }
+        }
+        catch (RuntimeException e){
+            logger.log(Level.SEVERE, "Fallo al agregar destinatario. Puede que no haya un servidor en ese puerto ó que el el destino ingresado no sea un numero entero válido");
         }
     }
 
@@ -173,24 +207,27 @@ public class Interfaz implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
+        try {
+            String[] mensaje_dividido = ((String) arg).split(":");
+            if (Integer.toString(destinatario).equals(mensaje_dividido[0])) {
+                this.vista_chat.append((String) arg);
+            }
 
-        String[] mensaje_dividido = ((String) arg).split(":");
-        if (Integer.toString(destinatario).equals(mensaje_dividido[0])) {
-            this.vista_chat.append((String) arg);
-        }
-
-        if (conversaciones.get(mensaje_dividido[0]) == null){
-            conversaciones.put(mensaje_dividido[0], (String) arg);
-            if (contactos.contains(Integer.parseInt(mensaje_dividido[0])) == false) {
-                contactos.add(Integer.parseInt(mensaje_dividido[0]));
-                chats.setListData(contactos.toArray());
+            if (conversaciones.get(mensaje_dividido[0]) == null) {
+                conversaciones.put(mensaje_dividido[0], (String) arg);
+                if (contactos.contains(Integer.parseInt(mensaje_dividido[0])) == false) {
+                    contactos.add(Integer.parseInt(mensaje_dividido[0]));
+                    chats.setListData(contactos.toArray());
+                }
+            } else {
+                conversaciones.put(mensaje_dividido[0], conversaciones.get(mensaje_dividido[0]) + (String) arg);
+                System.out.println(conversaciones.get(mensaje_dividido[0]));
             }
         }
-        else {
-            conversaciones.put(mensaje_dividido[0], conversaciones.get(mensaje_dividido[0]) + (String) arg);
-            System.out.println(conversaciones.get(mensaje_dividido[0]));
-        }
+        catch (RuntimeException e){
 
+            logger.log(Level.SEVERE, "Error al intentar agregar el mensaje entrante de un nuevo chat a la lista de conversaciones de chats");
+        }
         }
 
 }

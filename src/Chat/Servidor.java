@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Observable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Servidor extends Observable implements Runnable {
 
 
     private int puerto;
+    private final static Logger logger = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); // usa el logger configurado en la clase Interfaz
 
     /**
      * Constructor
@@ -36,15 +39,14 @@ public class Servidor extends Observable implements Runnable {
         try {
             //Crea el socket del servidor
             servidor = new ServerSocket(puerto);
-            System.out.println("Servidor iniciado");
+            logger.info("Servidor iniciado");
 
             //Este segundo try se encarga de estar siempre esperando un mensaje
             while (true) {
 
                 //Espero a que un cliente se conecte
                 socket = servidor.accept();
-
-                System.out.println("Cliente conectado");
+                logger.info("Mensaje entrante detectado");
 
                 in = new DataInputStream(socket.getInputStream());
 
@@ -61,7 +63,7 @@ public class Servidor extends Observable implements Runnable {
 
             }
         } catch (IOException ex) {
-            System.out.println("error");
+            logger.log(Level.SEVERE, "Fallo al recibir un nuevo mensaje ó iniciarlizar servidor");
             puerto++;
         }
         }

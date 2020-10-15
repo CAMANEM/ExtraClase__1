@@ -13,6 +13,7 @@ public class Cliente implements Runnable {
 
     private int puerto;
     private String mensaje;
+    private final static Logger logger = Logger.getLogger( Logger.GLOBAL_LOGGER_NAME ); // usa el logger configurado en la clase Interfaz
 
     /**
      * Constructor de la clase
@@ -46,7 +47,7 @@ public class Cliente implements Runnable {
             socket.close();
 
         } catch (IOException ex) {
-            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Fallo al enviar mensaje");
         }
 
     }

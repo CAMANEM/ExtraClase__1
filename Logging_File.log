@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2020-10-15T09:42:12</date>
+  <millis>1602776532798</millis>
+  <sequence>0</sequence>
+  <logger>global</logger>
+  <level>INFO</level>
+  <class>Chat.Interfaz</class>
+  <method>IniciarServidor</method>
+  <thread>1</thread>
+  <message>se creo el servidor sin error?</message>
+</record>
+<record>
+  <date>2020-10-15T09:42:12</date>
+  <millis>1602776532811</millis>
+  <sequence>1</sequence>
+  <logger>global</logger>
+  <level>INFO</level>
+  <class>Chat.Servidor</class>
+  <method>run</method>
+  <thread>21</thread>
+  <message>Servidor iniciado</message>
+</record>
