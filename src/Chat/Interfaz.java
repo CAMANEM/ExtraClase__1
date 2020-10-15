@@ -77,7 +77,6 @@ public class Interfaz implements Observer {
      */
     public void IniciarServidor(){
         servidor = new Servidor();
-        logger.info("se creo el servidor sin error?");
         servidor.addObserver(this);
         Thread hilo_servidor = new Thread(servidor);
         hilo_servidor.start();

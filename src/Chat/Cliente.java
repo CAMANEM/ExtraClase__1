@@ -47,7 +47,7 @@ public class Cliente implements Runnable {
             socket.close();
 
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Fallo al enviar mensaje");
+            logger.log(Level.SEVERE, "Fallo al enviar mensaje. Probablemente el destinatario no es válido");
         }
 
     }
