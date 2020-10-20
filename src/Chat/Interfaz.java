@@ -62,7 +62,7 @@ public class Interfaz implements Observer {
 
         try {
             FileHandler fileHandler = new FileHandler("Logging_File.log", false);
-            //fileHandler.setFormatter(new SimpleFormatter()); // simplifica los logs
+            fileHandler.setFormatter(new SimpleFormatter()); // simplifica los logs
             fileHandler.setLevel(Level.ALL);
             logger.addHandler(fileHandler);
         }
